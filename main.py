@@ -1,5 +1,7 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import  QMenu, QWidget, QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
+from PySide6.QtSvgWidgets import QSvgWidget
+from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtCore import Qt, QSize
 # 下面这几个区域你可以先用占位类，后面写完 topbar.py 等再导入真实的
 from ui.topbar import TopBar
 from ui.leftbar import LeftBar
@@ -16,6 +18,11 @@ class LogCard(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        
+        # 设置窗口图标
+        self.setWindowIcon(QIcon("resources/icons/Zerolux_logo.svg"))
+
+        # 设置窗口属性
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setWindowTitle("Zerolux Prv1.0")
         self.resize(900, 600)
@@ -53,6 +60,7 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(self.log_card)
         bottom_layout.addWidget(right_area)
         main_layout.addWidget(bottom)
+
 
 if __name__ == "__main__":
     app = QApplication([])

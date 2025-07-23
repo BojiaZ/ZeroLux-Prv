@@ -1,6 +1,7 @@
 # ui/LeftBar.py
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 from .MenuButton import MenuButton
+from functools import partial
 
 class LeftBar(QWidget):
     def __init__(self, parent=None):
@@ -13,15 +14,34 @@ class LeftBar(QWidget):
         layout.setContentsMargins(0, 24, 0, 0)  # 上24px，其它0
         layout.setSpacing(12)                   # 按钮间距12px
 
-        # 直接添加几个按钮，路径对照你的项目结构
-        layout.addWidget(MenuButton("resources/icons/menu_icon/overview.svg",          "Overview"))
-        layout.addWidget(MenuButton("resources/icons/menu_icon/protect.svg",           "RealTime-Protection"))
-        layout.addWidget(MenuButton("resources/icons/menu_icon/scan.svg",              "Scan"))
-        layout.addWidget(MenuButton("resources/icons/menu_icon/update.svg",            "Update"))
-        layout.addWidget(MenuButton("resources/icons/menu_icon/setting.svg",           "Setting"))
+        # 记录所有按钮
+        self.buttons = []
+        items = [
+            ("overview", "Overview"),
+            ("protect", "Protection"),
+            ("scan", "Scan"),
+            ("update", "Update"),
+            ("setting", "Setting"),
+        ]
+        for icon_base, text in items:
+            btn = MenuButton(icon_base, text)
+            btn.clicked.connect(partial(self.select_button, btn))
+            layout.addWidget(btn)
+            self.buttons.append(btn)
+
+        layout.addStretch()
+
+        # 默认选中第一个按钮
+        if self.buttons:
+            self.select_button(self.buttons[0])
 
         # 底部留空
         layout.addStretch()
 
         # 应用背景色
         self.setStyleSheet("background: #f6f7f9;")
+    
+    def select_button(self, btn):
+        for b in self.buttons:
+            b.setSelected(False)
+        btn.setSelected(True)
