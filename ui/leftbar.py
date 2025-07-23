@@ -39,7 +39,7 @@ class LeftBar(QWidget):
         layout.addStretch()
 
         # 应用背景色
-        self.setStyleSheet("background: #f6f7f9;")
+        self.setStyleSheet("background: #f4f5f7;")
     
     def select_button(self, btn):
         for b in self.buttons:

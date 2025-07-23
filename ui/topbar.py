@@ -15,7 +15,7 @@ class TopBar(QWidget):
         self._drag_pos = None
 
         self.setFixedHeight(56)
-        self.setStyleSheet("background: #f3f4f7;")
+        self.setStyleSheet("background: #f4f5f7;")
 
         # --- 2. 左侧LOGO ---
         logo_path = "resources/icons/Zerolux_logo.svg"
@@ -37,7 +37,6 @@ class TopBar(QWidget):
         # --- 4. 右侧最小化按钮 ---
         min_button = QPushButton()
         min_icon_normal = QIcon("resources/icons/topbar_icon/min_gray.svg")  # 正常状态图标
-        min_icon_hover = QIcon("resources/icons/topbar_icon/min_blue.svg")  # 悬停状态图标
         min_button.setIcon(min_icon_normal)
         min_button.setIconSize(QSize(32, 32))  # 设置图标大小
         min_button.setStyleSheet("""
@@ -47,21 +46,17 @@ class TopBar(QWidget):
                 color: #888;  /* 设置按钮文字颜色 */
             }
             QPushButton:hover {
-                background: #e4e9f7;  /* 鼠标悬停时的背景颜色 */
-                color: #2186eb;  /* 鼠标悬停时文字颜色 */
-                border-radius: 6px;  /* 圆角 */
-            }
+            background: rgba(0, 0, 0, 0.05);  /* 使用 rgba 设置透明灰色背景 */
+            color: #2186eb;  /* 鼠标悬停时文字颜色 */
+            border-radius: 6px;  /* 圆角 */
+        }
         """)
         min_button.clicked.connect(lambda: self.window().showMinimized())
-
-        # **hover时更换图标**
-        min_button.enterEvent = lambda event: min_button.setIcon(min_icon_hover)  # 鼠标进入时
-        min_button.leaveEvent = lambda event: min_button.setIcon(min_icon_normal)  # 鼠标离开时
 
         # --- 5. 右侧关闭按钮 ---
         close_button = QPushButton()
         close_icon_normal = QIcon("resources/icons/topbar_icon/close_gray.svg")  # 关闭按钮图标
-        close_icon_hover = QIcon("resources/icons/topbar_icon/close_red.svg")  # 悬停时的红色图标
+        close_icon_hover = QIcon("resources/icons/topbar_icon/close_white.svg")  # 悬停时的白色图标
         close_button.setIcon(close_icon_normal)
         close_button.setIconSize(QSize(32, 32))  # 设置图标大小
         close_button.setStyleSheet("""
@@ -71,7 +66,7 @@ class TopBar(QWidget):
                 color: #888;  /* 设置按钮文字颜色 */
             }
             QPushButton:hover {
-                background: #f9dddd;  /* 鼠标悬停时的背景颜色 */
+                background: #c93b32;  /* 鼠标悬停时的背景颜色 */
                 color: #c00;  /* 鼠标悬停时文字颜色 */
                 border-radius: 6px;  /* 圆角 */
             }

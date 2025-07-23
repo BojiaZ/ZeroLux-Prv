@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
         self.setFixedSize(900, 600)
         # 整个窗口主背景
         central = QWidget()
-        central.setStyleSheet("background: #f7f8fa;")  # main.py里，整个窗口底色
+        central.setStyleSheet("background: #f4f5f7;")  # main.py里，整个窗口底色
 
         self.setCentralWidget(central)
         main_layout = QVBoxLayout(central)

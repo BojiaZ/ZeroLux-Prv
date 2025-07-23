@@ -51,10 +51,8 @@ class MenuButton(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         rect = self.rect().adjusted(12, 4, -12, -4)
 
-        if self.selected:
-            painter.setBrush(QBrush(QColor(205, 224, 249)))  # 选中
-        elif self.hovered:
-            painter.setBrush(QBrush(QColor(233, 238, 246)))  # hover
+        if self.hovered:
+            painter.setBrush(QBrush(QColor(0, 0, 0, 8)))  # hover
         else:
             painter.setBrush(Qt.NoBrush)
 
