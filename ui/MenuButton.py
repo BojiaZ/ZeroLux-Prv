@@ -18,7 +18,7 @@ class MenuButton(QWidget):
         # 布局
         layout = QHBoxLayout(self)
         layout.setContentsMargins(32, 10, 8, 10)  # 上下10，左右同前
-        layout.setSpacing(10)  # 图标和文字更宽松
+        layout.setSpacing(13)  # 图标和文字更宽松
 
         # 拼接图标路径并创建初始图标
         self.icon_base = icon_path  # 保存图标基础名

@@ -7,7 +7,7 @@ class LeftBar(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         # 固定侧栏宽度
-        self.setFixedWidth(260)
+        #self.setFixedWidth(180)
 
         # 垂直布局，设置上边距和按钮间距
         layout = QVBoxLayout(self)
@@ -17,11 +17,11 @@ class LeftBar(QWidget):
         # 记录所有按钮
         self.buttons = []
         items = [
-            ("overview", "Overview"),
-            ("protect", "Protection"),
-            ("scan", "Scan"),
-            ("update", "Update"),
-            ("setting", "Setting"),
+            ("overview", "概览"),
+            ("protect", "保护"),
+            ("scan", "扫描"),
+            ("update", "更新"),
+            ("setting", "设置"),
         ]
         for icon_base, text in items:
             btn = MenuButton(icon_base, text)
