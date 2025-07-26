@@ -1,11 +1,14 @@
-# ui/LeftBar.py
+# ui/leftbar/leftbar.py
 from PySide6.QtWidgets import QWidget, QVBoxLayout
-from .MenuButton import MenuButton
+from .menu_button import MenuButton
 from functools import partial
+from PySide6.QtCore import Signal
 
 class LeftBar(QWidget):
+    page_selected = Signal(str)   # 新增：选中页面的信号
     def __init__(self, parent=None):
         super().__init__(parent)
+        
         # 固定侧栏宽度
         #self.setFixedWidth(180)
 
@@ -16,14 +19,14 @@ class LeftBar(QWidget):
 
         # 记录所有按钮
         self.buttons = []
-        items = [
+        self.items = [
             ("overview", "概览"),
             ("protect", "保护"),
             ("scan", "扫描"),
             ("update", "更新"),
             ("setting", "设置"),
         ]
-        for icon_base, text in items:
+        for icon_base, text in self.items:
             btn = MenuButton(icon_base, text)
             btn.clicked.connect(partial(self.select_button, btn))
             layout.addWidget(btn)
@@ -45,3 +48,7 @@ class LeftBar(QWidget):
         for b in self.buttons:
             b.setSelected(False)
         btn.setSelected(True)
+        # 找到按钮在 items 里的序号
+        idx = self.buttons.index(btn)
+        page_name = self.items[idx][0]
+        self.page_selected.emit(page_name)

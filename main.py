@@ -6,8 +6,8 @@ from PySide6.QtGui import QIcon, QPixmap, QShortcut
 from PySide6.QtCore import Qt, QSize
 
 from ui.topbar import TopBar
-from ui.leftbar import LeftBar
-from pages.overview_page import OverviewPage
+from ui.leftbar.leftbar import LeftBar
+from ui.main_content.main_content import MainContent
 
 class HomeCard(QWidget): pass
 class LogCard(QWidget): pass
@@ -21,7 +21,6 @@ class MainWindow(QMainWindow):
         self.resize(900, 600)
         self.setFixedSize(900, 600)
 
-        # 中央主容器
         central = QWidget()
         central.setStyleSheet("background: #f4f5f7;")
         self.setCentralWidget(central)
@@ -43,29 +42,16 @@ class MainWindow(QMainWindow):
 
         # 左侧导航栏
         self.left_bar = LeftBar()
-        self.left_bar.setFixedWidth(240)  # 这里可以方便调整侧栏宽度
+        self.left_bar.setFixedWidth(240)
         area_layout.addWidget(self.left_bar)
 
-        # 右内容区（所有页面装在QStackedWidget里）
-        self.main_widget = QStackedWidget()
-        self.main_widget.setContentsMargins(0, 0, 0, 0)
-
-        self.overview_page = OverviewPage()
-        self.log_card = LogCard()
-        self.main_widget.addWidget(self.overview_page)  # index 0
-        self.main_widget.addWidget(self.log_card)       # index 1
-        self.main_widget.setCurrentIndex(0)
-
-        area_layout.addWidget(self.main_widget)
+        # 右内容区（直接用MainContent）
+        self.main_content = MainContent()
+        area_layout.addWidget(self.main_content)
         main_layout.addWidget(main_area)
 
-        # 测试快捷键切换
-        self.shortcut1 = QShortcut(Qt.Key_F1, self)
-        self.shortcut1.activated.connect(lambda: self.main_widget.setCurrentIndex(0))
-        self.shortcut2 = QShortcut(Qt.Key_F2, self)
-        self.shortcut2.activated.connect(lambda: self.main_widget.setCurrentIndex(1))
-
-        # 后续可以用 self.left_bar 的信号连接 self.main_widget.setCurrentIndex
+        # 信号连接
+        self.left_bar.page_selected.connect(self.main_content.show_page)
 
 if __name__ == "__main__":
     app = QApplication([])
