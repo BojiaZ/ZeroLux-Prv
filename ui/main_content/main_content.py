@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QStackedWidget, QVBoxLayout
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, Signal
 
 from .pages import OVERVIEW, PROTECTION, SCAN, UPDATE, SETTINGS
 from .pages.overview_page import OverviewPage
@@ -9,8 +9,11 @@ from .pages.update_page import UpdatePage
 from .pages.settings_page import SettingsPage
 
 class MainContent(QWidget):
+    # 1)  声明一个对外信号
+    page_changed = Signal(str)  
     def __init__(self, parent=None):
         super().__init__(parent)
+        
 
         self.stack = QStackedWidget(self)
 
@@ -40,11 +43,14 @@ class MainContent(QWidget):
 
         self.goto(OVERVIEW)  # 指定默认页
 
+ # -------------------- 唯一路由口 --------------------
     def goto(self, key: str):
         idx = self._page_index.get(key)
         if idx is not None:
             self.stack.setCurrentIndex(idx)
+            self.page_changed.emit(key)            # ← 2) 切页后通知外界
 
+# -------------------- 槽：概览页按钮 ----------------
     @Slot(str)
     def _on_overview_action(self, key: str):
         if key == "scan":
@@ -54,6 +60,4 @@ class MainContent(QWidget):
         elif key == "update":
             self.goto(UPDATE)
         elif key == "report":
-            # 未来接日志页，这里跳转过去；暂时先忽略或跳设置
-            # self.goto(LOG)
             pass

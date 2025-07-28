@@ -5,50 +5,48 @@ from functools import partial
 from PySide6.QtCore import Signal
 
 class LeftBar(QWidget):
-    page_selected = Signal(str)   # 新增：选中页面的信号
+    page_selected = Signal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
-        
-        # 固定侧栏宽度
-        #self.setFixedWidth(180)
 
-        # 垂直布局，设置上边距和按钮间距
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 24, 0, 0)  # 上24px，其它0
-        layout.setSpacing(12)                   # 按钮间距12px
-
-        # 记录所有按钮
-        self.buttons = []
+        # 0️⃣ 定义导航列表
         self.items = [
             ("overview", "概览"),
-            ("protect", "保护"),
+            ("protection", "保护"),
             ("scan", "扫描"),
             ("update", "更新"),
-            ("setting", "设置"),
+            ("settings", "设置"),
         ]
-        for icon_base, text in self.items:
-            btn = MenuButton(icon_base, text)
-            btn.clicked.connect(partial(self.select_button, btn))
+
+        # 1️⃣ 布局
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 24, 0, 0)
+        layout.setSpacing(12)
+
+        # 2️⃣ key→button 映射
+        self._key_btn = {}
+
+        for key, text in self.items:
+            btn = MenuButton(key, text)
+            btn.clicked.connect(partial(self._on_btn_clicked, key))
             layout.addWidget(btn)
-            self.buttons.append(btn)
+            self._key_btn[key] = btn
 
         layout.addStretch()
 
-        # 默认选中第一个按钮
-        if self.buttons:
-            self.select_button(self.buttons[0])
+        # 3️⃣ 构造完只高亮，不 emit
+        self.set_highlight("overview")
 
-        # 底部留空
-        layout.addStretch()
-
-        # 应用背景色
+        # 4️⃣ 外观
         self.setStyleSheet("background: #f4f5f7;")
-    
-    def select_button(self, btn):
-        for b in self.buttons:
-            b.setSelected(False)
-        btn.setSelected(True)
-        # 找到按钮在 items 里的序号
-        idx = self.buttons.index(btn)
-        page_name = self.items[idx][0]
-        self.page_selected.emit(page_name)
+
+    # 点击槽
+    def _on_btn_clicked(self, key):
+        self.set_highlight(key)
+        self.page_selected.emit(key)
+
+    # 对外：高亮
+    def set_highlight(self, key: str):
+        for k, btn in self._key_btn.items():
+            btn.setSelected(k == key)

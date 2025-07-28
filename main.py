@@ -50,8 +50,10 @@ class MainWindow(QMainWindow):
         area_layout.addWidget(self.main_content)
         main_layout.addWidget(main_area)
 
-        # 信号连接
+        # 左栏点击 → 切换页面
         self.left_bar.page_selected.connect(self.main_content.goto)
+        # 页面切换完成 → 左栏高亮
+        self.main_content.page_changed.connect(self.left_bar.set_highlight)
 
 if __name__ == "__main__":
     app = QApplication([])
