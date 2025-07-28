@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(main_area)
 
         # 信号连接
-        self.left_bar.page_selected.connect(self.main_content.show_page)
+        self.left_bar.page_selected.connect(self.main_content.goto)
 
 if __name__ == "__main__":
     app = QApplication([])
