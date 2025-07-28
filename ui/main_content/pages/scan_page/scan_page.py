@@ -1,23 +1,26 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 from PySide6.QtCore import QTimer
 
-from .selector_bar import SelectorBar
+from .top_panel     import TopPanel
 from .scan_list_area import ScanListArea
-from .scan_card import ScanCard
+from .scan_card      import ScanCard
 
 class ScanPage(QWidget):
     """子路由器：顶部 SelectorBar + 下方 ScanListArea"""
     def __init__(self):
         super().__init__()
-        self.setStyleSheet("color: #333;") 
-        self._next_id = 1
-        self._cards = {}          # id -> ScanCard
+        self._next_id, self._cards = 1, {}
 
         root = QVBoxLayout(self)
-        self.selector = SelectorBar()
-        self.selector.start_scan.connect(self._create_fake_scan)   # 先用假扫描
-        root.addWidget(self.selector)
+        root.setContentsMargins(32, 16, 32, 24)
+        root.setSpacing(16)
 
+        # 顶部操作条
+        self.top = TopPanel()
+        self.top.start_scan.connect(self._create_fake_scan)
+        root.addWidget(self.top)
+
+        # 扫描记录列表
         self.area = ScanListArea()
         root.addWidget(self.area, 1)
 
