@@ -77,6 +77,7 @@ class ScanPage(QWidget):
 
         self.engine.start_scan()
 
+
     def _pause_scan(self, cid=None):
         if self.engine:
             self.engine.pause()
@@ -132,7 +133,11 @@ class ScanPage(QWidget):
 
         # 5. 复位状态
         self._running_card = None
-        self.engine        = None
+        eng = self.engine          # 把当前对象暂存
+        self.engine = None         # 先逻辑置空，下一次点击能启动
+        if eng:                    # 可能已在取消流程中置空
+            # 等事件循环空闲时再 deleteLater -> 避免“线程仍在运行”
+            QTimer.singleShot(0, eng.deleteLater)
 
 
     def _show_log(self, cid: int):
