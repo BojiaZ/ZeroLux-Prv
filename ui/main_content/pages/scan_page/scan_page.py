@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 from PySide6.QtCore import Qt, Signal, QDateTime, QTimer
-
+import weakref
 from .top_panel import TopPanel
 from .scan_list_area import ScanListArea
 from .running_card import RunningCard
@@ -11,6 +11,8 @@ class ScanPage(QWidget):
     """子路由器：顶部 SelectorBar + 下方 ScanListArea"""
     def __init__(self):
         super().__init__()
+
+        self._sig_cache = []   # <--- 新增：缓存 (signal, slot) 对
         self._next_id = 1
         self._cards = {}
 
@@ -36,7 +38,7 @@ class ScanPage(QWidget):
         if self.engine is not None:
             print("已有扫描任务在运行，请等待完成。")
             return
-
+        
         cid = self._next_id
         self._next_id += 1
 
@@ -49,14 +51,29 @@ class ScanPage(QWidget):
         card.resume_clicked.connect(self._resume_scan)
         card.cancel_clicked.connect(self._cancel_scan)
         card.show_log.connect(self._show_log)
-
+        
         self.engine = ScanEngine()
-        self.engine.progress.connect(card.update_progress)  # (percent, path)
-        self.engine.finished.connect(
-            lambda cid_=cid, scan_mode_=scan_mode, card_=card: self._on_scan_finished(cid_, scan_mode_, card_)
-        )
-        self.engine.paused.connect(lambda: card.set_paused(True))
-        self.engine.resumed.connect(lambda: card.set_paused(False))
+        
+        # ---- 1. 进度 ----
+        progress_slot = card.update_progress
+        self.engine.progress.connect(progress_slot)
+        self._sig_cache.append((self.engine.progress, progress_slot))
+
+        # ---- 2. finished ----
+        finished_slot = lambda cid_=cid, mode_=scan_mode, card_=card: \
+            self._on_scan_finished(cid_, mode_, card_)
+        self.engine.finished.connect(finished_slot)
+        self._sig_cache.append((self.engine.finished, finished_slot))
+
+        # ---- 3. 暂停 / 恢复 ----
+        pause_slot = lambda: card.set_paused(True)
+        resume_slot = lambda: card.set_paused(False)
+        self.engine.paused.connect(pause_slot)
+        self.engine.resumed.connect(resume_slot)
+        self._sig_cache += [
+            (self.engine.paused, pause_slot),
+            (self.engine.resumed, resume_slot)
+        ]
 
         self.engine.start_scan()
 
@@ -71,7 +88,9 @@ class ScanPage(QWidget):
     def _cancel_scan(self, cid=None):
         if self.engine:
             self.engine.stop()
+            self._disconnect_all()
             self.engine = None
+            
             if self._running_card:
                 # 取消时也用结果卡替换
                 cid = self._running_card.id
@@ -89,7 +108,8 @@ class ScanPage(QWidget):
 
     def _on_scan_finished(self, cid: int, scan_mode: str, card: RunningCard):
         """扫描完成后把 RunningCard → ResultCard"""
-        
+        self._disconnect_all()
+
         # 1. 清理 UI 中的 RunningCard
         self.area.remove_card(card)
         self._cards.pop(cid, None)
@@ -117,3 +137,12 @@ class ScanPage(QWidget):
 
     def _show_log(self, cid: int):
         print(f"[Demo] 打开 #{cid} 日志弹窗…")
+
+    def _disconnect_all(self):
+        """安全地把之前缓存的所有信号都断开"""
+        for sig, slot in self._sig_cache:
+            try:
+                sig.disconnect(slot)
+            except (TypeError, RuntimeError):
+                pass
+        self._sig_cache.clear()
