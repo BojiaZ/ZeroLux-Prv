@@ -35,7 +35,7 @@ QToolButton::menu-indicator {{ image:none; }}
 """
 
 class TopPanel(QWidget):
-    start_scan = Signal(str)        # quick / full / custom / removable
+    start_scan = Signal(str)        # smart / full / custom / removable
 
     def __init__(self):
         super().__init__()
@@ -54,13 +54,13 @@ class TopPanel(QWidget):
         row.setSpacing(18)
 
         # ① 智能扫描卡片（左）
-        btn_quick = QPushButton()
-        btn_quick.setCursor(Qt.PointingHandCursor)
-        btn_quick.setStyleSheet(CARD_QSS)
-        btn_quick.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        btn_quick.clicked.connect(lambda: self.start_scan.emit("quick"))
+        btn_smart = QPushButton()
+        btn_smart.setCursor(Qt.PointingHandCursor)
+        btn_smart.setStyleSheet(CARD_QSS)
+        btn_smart.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        btn_smart.clicked.connect(lambda: self.start_scan.emit("smart"))
 
-        q_layout = QHBoxLayout(btn_quick)
+        q_layout = QHBoxLayout(btn_smart)
         q_layout.setContentsMargins(20, 12, 20, 12)   # ← 左右 20 px
         q_layout.setSpacing(14)                       # 图标 ↔ 文字
         q_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -74,9 +74,9 @@ class TopPanel(QWidget):
         vtxt.setSpacing(4)
         vtxt.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
-        lbl1 = QLabel("扫描计算机")
+        lbl1 = QLabel("智能扫描")
         lbl1.setStyleSheet(f"font-size:16px; color:{PRIMARY}; font-weight:500; background:transparent;")
-        lbl2 = QLabel("扫描所有本地磁盘并清除威胁")
+        lbl2 = QLabel("扫描系统关键位置并清除威胁")
         lbl2.setStyleSheet(f"font-size:12px; color:{TEXT}; background:transparent;")
 
         vtxt.addWidget(lbl1)
@@ -131,7 +131,7 @@ class TopPanel(QWidget):
         btn_adv.setMenu(menu)
 
         # 将两卡片放入行，并等权重撑满
-        row.addWidget(btn_quick, 1)
+        row.addWidget(btn_smart, 1)
         row.addWidget(btn_adv,   1)
         root.addLayout(row)
 
