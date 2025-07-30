@@ -92,8 +92,8 @@ class ScanEngine(QObject):
         except Exception:
             username = os.environ.get('USERNAME', 'Public')
         return [
-            fr"C:\Windows\System32",
-            fr"C:\Program Files",
-            fr"C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup",
-            # fr"C:\Users\{username}\Desktop",
+            # fr"C:\Windows\",
+            # fr"C:\Program Files",
+            # fr"C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup",
+            fr"C:\Users\{username}\Desktop",
         ]

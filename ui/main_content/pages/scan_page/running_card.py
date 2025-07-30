@@ -31,23 +31,24 @@ QToolButton:hover {{
 """
 
 
-class ScanCard(QWidget):
+class RunningCard(QWidget):
     pause_clicked  = Signal(int)
     resume_clicked = Signal(int)
     cancel_clicked = Signal(int)
     show_log       = Signal(int)
 
-    def __init__(self, record_id: int, mode: str):
+    def __init__(self, record_id: int, scan_mode: str):
         super().__init__()
         self.id = record_id
         self.state = "running"   # 支持暂停/恢复切换
+
+        self.mode = scan_mode
 
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(f"""
             background:{CARD_BG};
             border:1px solid {CARD_BORDER};
             border-radius:{CARD_RADIUS}px;
-            box-shadow:{CARD_SHADOW};
         """)
 
         shadow = QGraphicsDropShadowEffect(self)
@@ -55,9 +56,11 @@ class ScanCard(QWidget):
         shadow.setColor(QColor(0, 0, 0, 40))
         shadow.setOffset(0, 2)
         self.setGraphicsEffect(shadow)
+        self.setFixedWidth(576)
+        self.setFixedHeight(189)
 
         self.stack = QVBoxLayout(self)
-        self._build_running_page(mode)
+        self._build_running_page(scan_mode)
 
     def _build_running_page(self, mode:str):
         root = QVBoxLayout()
@@ -158,9 +161,9 @@ class ScanCard(QWidget):
             self.lbl_status.setText(f"扫描进行中… {percent}%")
 
     # —— 工具 ————————————————————————
-    def _mode_zh(self, m):
+    def _mode_zh(self, mode):
         return {"smart":"智能扫描","full":"计算机扫描",
-                "custom":"自定义扫描","removable":"移动磁盘扫描"}.get(m, m)
+                "custom":"自定义扫描","removable":"移动磁盘扫描"}.get(mode, mode)
 
     def _set_toggle_icon(self, name: str):
         self.btn_toggle.setIcon(QIcon(ICON_DIR.format(f"{name}.svg")))
@@ -178,3 +181,5 @@ class ScanCard(QWidget):
             percent = self.bar.value()
             self.lbl_status.setText(f"扫描进行中… {percent}%")
             self.resume_clicked.emit(self.id)
+    
+    

@@ -126,7 +126,7 @@ class TopPanel(QWidget):
                           ("自定义扫描","custom"),
                           ("可移动磁盘","removable")]:
             act = QAction(txt, menu)
-            act.triggered.connect(lambda _, m=mode: self.start_scan.emit(m))
+            act.triggered.connect(lambda _, mode=mode: self.start_scan.emit(mode))
             menu.addAction(act)
         btn_adv.setMenu(menu)
 
