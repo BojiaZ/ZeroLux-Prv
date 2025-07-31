@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QMessageBox
 from PySide6.QtCore import Qt, Signal, QDateTime, QTimer
 import weakref
 from .top_panel import TopPanel
@@ -32,13 +32,33 @@ class ScanPage(QWidget):
         self.engine = None
         self._running_card = None
 
-    def _start_scan(self, scan_mode: str):
+    def _start_scan(self, scan_mode: str, paths: list):
         """启动智能扫描（只允许一个任务同时进行）"""
         # 已有任务在运行，直接忽略
         if self.engine is not None:
             print("已有扫描任务在运行，请等待完成。")
             return
         
+        # ---- 特殊处理 removable，自动拉路径 ----
+        if scan_mode == "removable" and not paths:
+            paths = ScanEngine.removable_drives()
+            if not paths:
+                msg = QMessageBox(self)
+                msg.setIcon(QMessageBox.Information)
+                msg.setWindowTitle("没有检测到可移动磁盘")
+                msg.setText("未检测到可移动磁盘，请插入 U 盘或移动硬盘后再试。")
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.setStyleSheet("""
+                    QMessageBox      { background:#fff; }
+                    QLabel           { color:#222; font-size:14px; }
+                    QPushButton      { min-width:64px; min-height:28px;
+                                    border:1px solid #009CA6; color:#009CA6;
+                                    border-radius:4px; }
+                    QPushButton:hover{ background:#009CA6; color:#fff; }
+                """)
+                msg.exec()
+                return
+
         cid = self._next_id
         self._next_id += 1
 
@@ -75,7 +95,7 @@ class ScanPage(QWidget):
             (self.engine.resumed, resume_slot)
         ]
 
-        self.engine.start_scan()
+        self.engine.start_scan(scan_mode, custom_paths=paths)
 
 
     def _pause_scan(self, cid=None):

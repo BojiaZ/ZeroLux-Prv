@@ -2,6 +2,8 @@
 from PySide6.QtCore import QObject, Signal, QThread
 import os
 import time
+import ctypes, string
+import psutil
 
 class ScanWorker(QThread):
     progress = Signal(int, str)    # (百分比, 当前路径)
@@ -63,8 +65,8 @@ class ScanEngine(QObject):
         super().__init__()
         self.worker = None
 
-    def start_scan(self):
-        paths = self._get_smart_scan_paths()
+    def start_scan(self, mode: str, *, custom_paths=None):
+        paths = self._select_paths(mode, custom_paths)
         self.worker = ScanWorker(paths)
         self.worker.progress.connect(self.progress.emit)
         self.worker.finished.connect(self.finished.emit)
@@ -85,15 +87,61 @@ class ScanEngine(QObject):
             self.worker.stop()
             self.worker = None
 
-    def _get_smart_scan_paths(self):
-        # 示例：你可以根据需要调整关键目录
+    # ---------- 路径选择 ----------
+    def _select_paths(self, mode: str, custom_paths):
+        """
+        根据扫描模式返回要遍历的根路径列表
+        smart       → 系统关键目录
+        full        → 所有固定磁盘根目录
+        custom      → 调用方传进来的自定义列表
+        removable   → 可移动磁盘根目录
+        """
+        dispatch = {
+            "smart":     self._smart_paths,
+            "full":      self._fixed_drive_roots,
+            "removable": self.removable_drives,
+            "custom":    lambda: custom_paths #or self._smart_paths()
+        }
+
+       # 若 mode 不在字典，用 smart 兜底
+        return dispatch.get(mode, self._smart_paths)()
+
+    # ---------- 各模式下的具体实现 ----------
+    def _smart_paths(self):
         try:
             username = os.getlogin()
         except Exception:
             username = os.environ.get('USERNAME', 'Public')
         return [
-            # fr"C:\Windows\",
-            # fr"C:\Program Files",
-            # fr"C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup",
+            fr"C:\Windows\System32",
+            fr"C:\Program Files",
+            fr"C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup",
             fr"C:\Users\{username}\Desktop",
         ]
+
+    def _fixed_drive_roots(self):
+        bitmask = ctypes.windll.kernel32.GetLogicalDrives()
+        roots = []
+        for i, letter in enumerate(string.ascii_uppercase):
+            if bitmask & (1 << i):
+                drive = f"{letter}:\\"
+                # DRIVE_FIXED = 3
+                if ctypes.windll.kernel32.GetDriveTypeW(drive) == 3:
+                    roots.append(drive)
+        return roots
+
+    @staticmethod
+    def removable_drives():
+        import os, ctypes, string, psutil
+        drives = []
+        if os.name == "nt":
+            bitmask = ctypes.windll.kernel32.GetLogicalDrives()
+            for i, letter in enumerate(string.ascii_uppercase):
+                if bitmask & (1 << i) and \
+                   ctypes.windll.kernel32.GetDriveTypeW(f"{letter}:\\") == 2:
+                    drives.append(f"{letter}:\\")
+        else:
+            for p in psutil.disk_partitions():
+                if "removable" in p.opts.lower():
+                    drives.append(p.mountpoint)
+        return drives

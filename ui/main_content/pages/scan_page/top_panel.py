@@ -1,7 +1,7 @@
 # ui/pages/scan_page/top_panel.py
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout,
-    QLabel, QPushButton, QToolButton, QMenu, QSizePolicy
+    QLabel, QPushButton, QToolButton, QMenu, QSizePolicy, QFileDialog
 )
 from PySide6.QtGui import QPixmap, QAction
 from PySide6.QtSvgWidgets import QSvgWidget
@@ -35,7 +35,7 @@ QToolButton::menu-indicator {{ image:none; }}
 """
 
 class TopPanel(QWidget):
-    start_scan = Signal(str)        # smart / full / custom / removable
+    start_scan = Signal(str, list)        # smart / full / custom / removable
 
     def __init__(self):
         super().__init__()
@@ -58,7 +58,7 @@ class TopPanel(QWidget):
         btn_smart.setCursor(Qt.PointingHandCursor)
         btn_smart.setStyleSheet(CARD_QSS)
         btn_smart.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        btn_smart.clicked.connect(lambda: self.start_scan.emit("smart"))
+        btn_smart.clicked.connect(lambda: self.start_scan.emit("smart", []))
 
         q_layout = QHBoxLayout(btn_smart)
         q_layout.setContentsMargins(20, 12, 20, 12)   # ← 左右 20 px
@@ -126,7 +126,18 @@ class TopPanel(QWidget):
                           ("自定义扫描","custom"),
                           ("可移动磁盘","removable")]:
             act = QAction(txt, menu)
-            act.triggered.connect(lambda _, mode=mode: self.start_scan.emit(mode))
+
+            if mode == "custom":
+                def _pick_dir(_checked=False, *, self=self):
+                    path = QFileDialog.getExistingDirectory(
+                        self, "选择扫描文件夹", r"C:\\", QFileDialog.ShowDirsOnly
+                    )
+                    if path:
+                        self.start_scan.emit("custom", [path])
+                act.triggered.connect(_pick_dir)
+            else:
+                act.triggered.connect(lambda _, mode=mode: self.start_scan.emit(mode, []))
+
             menu.addAction(act)
         btn_adv.setMenu(menu)
 
