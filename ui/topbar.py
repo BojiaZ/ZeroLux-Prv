@@ -23,7 +23,7 @@ class TopBar(QWidget):
         logo.setFixedSize(28, 32)
         logo.setStyleSheet("background: transparent;")
         # --- 3. 标题 ---
-        title = QLabel("Zerolux Prv1.0")
+        title = QLabel("Zerolux Antivirus")
         title.setStyleSheet("""
             font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
             font-size: 22px;

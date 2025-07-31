@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowIcon(QIcon("resources/icons/Zerolux_logo.svg"))
         self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setWindowTitle("Zerolux Prv1.0")
+        self.setWindowTitle("Zerolux Antivirus")
         self.resize(900, 600)
         self.setFixedSize(900, 600)
 
