@@ -5,7 +5,7 @@ from .top_panel import TopPanel
 from .scan_list_area import ScanListArea
 from .running_card import RunningCard
 from .result_card import ResultCard
-from engine.engine import ScanEngine
+from engine import EngineInterface
 
 class ScanPage(QWidget):
     """子路由器：顶部 SelectorBar + 下方 ScanListArea"""
@@ -41,7 +41,7 @@ class ScanPage(QWidget):
         
         # ---- 特殊处理 removable，自动拉路径 ----
         if scan_mode == "removable" and not paths:
-            paths = ScanEngine.removable_drives()
+            paths = EngineInterface.removable_drives()
             if not paths:
                 msg = QMessageBox(self)
                 msg.setIcon(QMessageBox.Information)
@@ -72,7 +72,7 @@ class ScanPage(QWidget):
         card.cancel_clicked.connect(self._cancel_scan)
         card.show_log.connect(self._show_log)
         
-        self.engine = ScanEngine()
+        self.engine = EngineInterface()
         
         # ---- 1. 进度 ----
         progress_slot = card.update_progress
