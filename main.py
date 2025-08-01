@@ -9,6 +9,11 @@ from ui.topbar import TopBar
 from ui.leftbar.leftbar import LeftBar
 from ui.main_content.main_content import MainContent
 
+# ==== 业务路由层 ====
+from excute.excute_router import ExecuteRouter
+from quarantine.quarantine_route import QuarantineRoute
+from scans.scans_router import ScanRoute
+
 class HomeCard(QWidget): pass
 class LogCard(QWidget): pass
 
@@ -54,6 +59,12 @@ class MainWindow(QMainWindow):
         self.left_bar.page_selected.connect(self.main_content.goto)
         # 页面切换完成 → 左栏高亮
         self.main_content.page_changed.connect(self.left_bar.set_highlight)
+
+        # 业务对象初始化
+        self.execute_router = ExecuteRouter()
+        self.quarantine_route = QuarantineRoute(self.execute_router)
+        self.scan_route = ScanRoute()
+
 
 if __name__ == "__main__":
     app = QApplication([])
