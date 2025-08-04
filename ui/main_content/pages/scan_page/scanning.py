@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QProgressBar, QTableWidget, QTableWidgetItem, QHeaderView, QFrame
 )
-from PySide6.QtCore import Qt, QElapsedTimer, Slot
+from PySide6.QtCore import Qt, QElapsedTimer, Slot, Signal
 
 
 class ScanningPage(QWidget):
@@ -21,6 +21,7 @@ class ScanningPage(QWidget):
         5. 结果表格 (路径 | 威胁类型)
         6. 底部统计 & 暂停 / 停止
     """
+    scan_aborted = Signal()          # ← 新增
 
     MODE2TEXT = {
         "smart": "智能扫描",
@@ -163,6 +164,23 @@ class ScanningPage(QWidget):
 
     def _stop_scan(self):
         self.route.stop_scan()
+        self._aborted = True                 # 打标记
         self.btn_pause.setDisabled(True)
         self.btn_stop.setDisabled(True)
         self.lab_desc.setText("扫描已停止")
+
+    def reset(self):
+        self.table.setRowCount(0)
+        self.progress.setValue(0)
+        self.lab_path.clear()
+        self.lab_files.setText("已扫描文件：0")
+        self.lab_threat.setText("发现威胁：0")
+        self._timer.invalidate()
+        # ⬇️ 这三样一定要恢复
+        self._paused = False
+        self.btn_pause.setEnabled(True);  self.btn_pause.setText("暂停")
+        self.btn_stop.setEnabled(True)
+        self._aborted = False          # ← 新增
+        # 计时 —— 新增
+        self._timer.invalidate()          # 让计时器失效
+        self.lab_time.setText("00:00")    # 时间显示归零
