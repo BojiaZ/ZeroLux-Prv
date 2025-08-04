@@ -33,6 +33,11 @@ class MainWindow(QMainWindow):
         main_layout = QVBoxLayout(central)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
+        
+        # 业务对象初始化
+        self.execute_router = ExecuteRouter()
+        self.quarantine_route = QuarantineRoute(self.execute_router)
+        self.scan_route = ScanRoute()
 
         # 顶部栏
         self.top_bar = TopBar()
@@ -51,7 +56,7 @@ class MainWindow(QMainWindow):
         area_layout.addWidget(self.left_bar)
 
         # 右内容区（直接用MainContent）
-        self.main_content = MainContent()
+        self.main_content = MainContent(scan_route=self.scan_route)
         area_layout.addWidget(self.main_content)
         main_layout.addWidget(main_area)
 
@@ -60,12 +65,7 @@ class MainWindow(QMainWindow):
         # 页面切换完成 → 左栏高亮
         self.main_content.page_changed.connect(self.left_bar.set_highlight)
 
-        # 业务对象初始化
-        self.execute_router = ExecuteRouter()
-        self.quarantine_route = QuarantineRoute(self.execute_router)
-        self.scan_route = ScanRoute()
-
-
+    
 if __name__ == "__main__":
     app = QApplication([])
     window = MainWindow()

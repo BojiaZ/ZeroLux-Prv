@@ -70,7 +70,8 @@ class Traverser(QThread):
         """
         设置要扫描的根目录路径（启动前调用）
         """
-        self.paths = paths
+        self.paths = [os.path.abspath(p) for p in paths]   # 全部转绝对路径
+        print(f"[Traverser] got top paths: {self.paths}")
 
     def pause(self):
         """暂停扫描"""
@@ -89,20 +90,23 @@ class Traverser(QThread):
         线程入口，执行遍历和检测流程。
         外部调用 self.start() 启动线程
         """
-        if not self.root_path:
+        print("[Traverser] start scanning...")
+        if not self.paths:
+            print("[Traverser] paths empty, finish immediately")
             self.signal_scan_finished.emit()
             self.signal_scan_all_results.emit([])
             return
 
         files = self._traverse_files(self.paths)
         total_files = len(files)
+        print(f"[Traverser] total files = {total_files}")
         self._all_results = []
 
         if total_files == 0:
             self.signal_scan_finished.emit()
             self.signal_scan_all_results.emit([])
             return
-
+        
         for idx, file_path in enumerate(files):
             if self._stopped:
                 break
@@ -125,7 +129,7 @@ class Traverser(QThread):
         self.signal_scan_finished.emit()
         self.signal_scan_all_results.emit(self._all_results)   # 批量发给UI
 
-    def _traverse_files(self, root_path: list[str]) -> list[str]:
+    def _traverse_files(self, paths: list[str]) -> list[str]:
         """
         递归遍历指定目录或单文件，返回所有文件完整路径列表。
 
@@ -135,15 +139,12 @@ class Traverser(QThread):
         Returns:
             list[str]: 全部待扫描文件的绝对路径
         """
-        def _traverse_files(self, paths: list[str]) -> list[str]:
-            def _traverse_files(self, paths: list[str]) -> list[str]:
-                all_files = []
-                for root_path in paths:
-                    if os.path.isfile(root_path):
-                        all_files.append(os.path.abspath(root_path))
-                    else:
-                        for dirpath, _, filenames in os.walk(root_path):
-                            for filename in filenames:
-                                full_path = os.path.join(dirpath, filename)
-                                all_files.append(full_path)
-                return all_files
+        all_files: list[str] = []
+        for p in paths:
+            if os.path.isfile(p):
+                all_files.append(os.path.abspath(p))
+            else:
+                for dirpath, _, filenames in os.walk(p):
+                    for name in filenames:
+                        all_files.append(os.path.join(dirpath, name))
+        return all_files

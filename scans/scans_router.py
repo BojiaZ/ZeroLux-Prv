@@ -77,7 +77,7 @@ class ScanRoute(QObject):
             paths = [custom_path]
         else:
             paths = ["C:\\"]
-
+        
         # 若有旧扫描线程，先停掉并回收
         if self.traverser is not None:
             self.traverser.stop()

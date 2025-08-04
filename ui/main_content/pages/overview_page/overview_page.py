@@ -30,7 +30,7 @@ class OverviewPage(QWidget):
         btn_layout.setSpacing(32)
         btn_layout.setAlignment(Qt.AlignCenter)
 
-        card_scan = FunctionCard("resources/overview/scan_blue.svg", "快速扫描", "查杀系统关键位置", key="scan")
+        card_scan = FunctionCard("resources/overview/scan_blue.svg", "计算机扫描", "按需扫描计算机", key="scan")
         card_update = FunctionCard("resources/overview/update.svg", "更新组件", "同步病毒库和组件", key="update")
         card_report = FunctionCard("resources/overview/report.svg", "安全报告", "查看最近安全活动", key="report")
 

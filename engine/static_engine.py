@@ -22,7 +22,7 @@ class StaticEngine:
     """
     def __init__(self):
         self.hash_db = None
-        self.HASH_DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'db', 'loki_hashes.txt')
+        self.HASH_DB_PATH = os.path.join(os.path.dirname(__file__), 'loki_hashes.txt')
         self._load_hash_db()
 
     def _load_hash_db(self):
