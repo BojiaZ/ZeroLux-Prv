@@ -107,6 +107,12 @@ class Traverser(QThread):
             self.signal_scan_all_results.emit([])
             return
         
+        # run() 里 —— 开始扫描就先发 0%，避免界面空白
+        self.signal_progress.emit(
+            TraverseProgress(current_file="", percent_complete=0,
+                            done=0, total=total_files)
+        )
+
         for idx, file_path in enumerate(files):
             if self._stopped:
                 break
@@ -115,15 +121,20 @@ class Traverser(QThread):
             while self._paused and not self._stopped:
                 time.sleep(0.1)
 
+            # 计算进度并发送信号
+            percent = (idx + 1) / total_files * 100
+            progress = TraverseProgress(
+                current_file=file_path,
+                percent_complete=percent,
+                done=idx + 1,
+                total=total_files
+            )
+            self.signal_progress.emit(progress)
+
             # 调用静态查杀引擎检测文件
             result = self.static_engine.check_file_by_hash(file_path)
             self.signal_scan_result.emit(result)
             self._all_results.append(result)  # 收集
-
-            # 计算进度并发送信号
-            percent = (idx + 1) / total_files * 100
-            progress = TraverseProgress(current_file=file_path, percent_complete=percent)
-            self.signal_progress.emit(progress)
 
         # 发送扫描完成信号
         self.signal_scan_finished.emit()
