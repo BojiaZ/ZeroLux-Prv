@@ -231,9 +231,7 @@ class ScanResultPage(QWidget):
     # ------------------------------------------------------------------
     @Slot(object)
     def _on_action_progress(self, p):
-        percent = getattr(p, "percent", int(p.done / max(p.total, 1) * 100))
-        self.progress.setValue(percent)
-        self.lab_path.setText(f"正在处理：{getattr(p, 'current_path', '')}")
+        self.progress.setValue(int(p))
 
     @Slot(object)
     def _on_action_result(self, r: ActionResult):

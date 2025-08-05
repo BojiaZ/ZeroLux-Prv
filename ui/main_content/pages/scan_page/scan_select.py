@@ -4,14 +4,17 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Signal, Qt
 
 from scans.scans_router import ScanRoute
-
+from .scan_history import ScanHistory
+from managers.history_manager import HistoryManager
 
 class ScanSelectPage(QWidget):
     # 扫描模式、路径（custom模式才有路径，否则为""）
     sig_start_scan = Signal(str, str)  # (mode, custom_path)
 
-    def __init__(self, parent=None):
+    def __init__(self, history_mgr: HistoryManager,parent=None):
         super().__init__(parent)
+
+        self.history_mgr = history_mgr     # 保存实例
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -52,12 +55,17 @@ class ScanSelectPage(QWidget):
         # ------- 内容区 -------
         self.stacked = QStackedWidget()
         self.stacked.addWidget(self._scan_content())
+        self.history_page   = ScanHistory(history_mgr)   # ★ 新增
         self.stacked.addWidget(self._history_content())
+        self.stacked.addWidget(self.history_page)
         layout.addWidget(self.stacked)
 
+    # ---------- Tab 切换 ----------
     def switch_tab(self, idx):
         self.tab_idx = idx
         self.stacked.setCurrentIndex(idx)
+        if idx == 1:                          # 当切到 “扫描历史” 时刷新
+            self.history_page.refresh()
         self._update_tab_styles()
 
     def _update_tab_styles(self):
@@ -173,9 +181,5 @@ class ScanSelectPage(QWidget):
             self.sig_start_scan.emit("custom", path)
 
     def _history_content(self):
-        w = QWidget()
-        l = QVBoxLayout(w)
-        l.setAlignment(Qt.AlignTop)
-        l.setContentsMargins(64, 64, 0, 0)
-        l.addWidget(QLabel("暂无扫描历史记录"))
-        return w
+        # 不再用占位，直接返回真实页面（兼容旧调用）
+        return self.history_page
