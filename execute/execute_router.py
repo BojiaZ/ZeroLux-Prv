@@ -1,11 +1,11 @@
 from PySide6.QtCore import QObject, Signal, Slot
 from structs.scanresult import ScanResult
 from structs.actionresults import ActionResult
-from .excute_engine import ExecuteEngine
+from .execute_engine import ExecuteEngine
 import os
 import datetime
 
-class ExecuteRouter(QObject):
+class ExecuteRoute(QObject):
     """
     动作路由器（调度器）
 
@@ -62,7 +62,8 @@ class ExecuteRouter(QObject):
                 handle_time=now,                   # 操作时间
                 comment=s.comment,                 # 备注/描述
                 origin_path=getattr(s, "origin_path", None), # 隔离前原始路径（可选）
-                error=error_msg                    # 错误信息
+                error=error_msg,                   # 错误信息
+                reason=s.reason
             )
 
             self.signal_execute_result.emit(action)  # 实时发送单项处理结果，供UI刷新

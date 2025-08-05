@@ -5,18 +5,20 @@ from .scan_select import ScanSelectPage
 from scans.scans_router import ScanRoute
 from .scanning import ScanningPage
 from .scan_result import ScanResultPage
+from execute.execute_router import ExecuteRoute
 
 class ScanPage(QWidget):
-    def __init__(self, scan_route: ScanRoute, parent=None):
+    def __init__(self, scan_route: ScanRoute, execute_route: ExecuteRoute, parent=None):
         super().__init__(parent)
 
         self.scan_route = scan_route
+        self.execute_route = execute_route
         self.stacked = QStackedWidget(self)
 
         # 实例化各子页面
         self.select_page = ScanSelectPage()
         self.scanning_page = ScanningPage(scan_route)
-        self.result_page = ScanResultPage()
+        self.result_page = ScanResultPage(execute_route)
         # self.history_page = ScanHistoryPage()
 
         # 挂到堆栈
@@ -39,6 +41,7 @@ class ScanPage(QWidget):
 
         # ③ Router 扫描结束（批量结果） → 跳结果页
         self.scan_route.signal_scan_all_results.connect(self._on_all_results)
+
 
     
 

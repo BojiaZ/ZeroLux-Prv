@@ -30,6 +30,7 @@ class ScanResult:
     engine: Optional[str] = None
     hash_value: Optional[str] = None
     rule_id: Optional[str] = None
+    reason : Optional[str] = None
     # ===== 隔离区专用扩展字段 =====
     origin_path: Optional[str] = None
     quarantine_time: Optional[str] = None

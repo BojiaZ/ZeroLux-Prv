@@ -8,19 +8,19 @@ from .pages.scan_page.scan_page import ScanPage
 from .pages.update_page import UpdatePage
 from .pages.settings_page import SettingsPage
 from scans.scans_router import ScanRoute
-
+from execute.execute_router import ExecuteRoute
 class MainContent(QWidget):
     # 1)  声明一个对外信号
     page_changed = Signal(str)  
-    def __init__(self, scan_route: ScanRoute, parent=None):
+    def __init__(self, scan_route: ScanRoute, execute_route: ExecuteRoute, parent=None):
         super().__init__(parent)
-
+        self.execute_engine = execute_route
         self.scan_route = scan_route
         self.stack = QStackedWidget(self)
 
         # 保留实例引用，后续可直接调用页面方法
         self.overview_page   = OverviewPage()
-        self.scan_page       = ScanPage(scan_route)
+        self.scan_page       = ScanPage(scan_route, execute_route)
         self.protection_page = ProtectionPage()
         self.update_page     = UpdatePage()
         self.settings_page   = SettingsPage()

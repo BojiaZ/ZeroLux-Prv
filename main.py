@@ -10,7 +10,7 @@ from ui.leftbar.leftbar import LeftBar
 from ui.main_content.main_content import MainContent
 
 # ==== 业务路由层 ====
-from excute.excute_router import ExecuteRouter
+from execute.execute_router import ExecuteRoute
 from quarantine.quarantine_route import QuarantineRoute
 from scans.scans_router import ScanRoute
 
@@ -35,8 +35,8 @@ class MainWindow(QMainWindow):
         main_layout.setSpacing(0)
         
         # 业务对象初始化
-        self.execute_router = ExecuteRouter()
-        self.quarantine_route = QuarantineRoute(self.execute_router)
+        self.execute_route = ExecuteRoute()
+        self.quarantine_route = QuarantineRoute(self.execute_route)
         self.scan_route = ScanRoute()
 
         # 顶部栏
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
         area_layout.addWidget(self.left_bar)
 
         # 右内容区（直接用MainContent）
-        self.main_content = MainContent(scan_route=self.scan_route)
+        self.main_content = MainContent(scan_route=self.scan_route, execute_route=self.execute_route)
         area_layout.addWidget(self.main_content)
         main_layout.addWidget(main_area)
 

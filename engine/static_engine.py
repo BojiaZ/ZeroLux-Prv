@@ -69,7 +69,8 @@ class StaticEngine:
                 return ScanResult(
                     file_path=filepath,
                     detected=True,
-                    threat_type="Known Malware (Hash Match)",
+                    threat_type="Known Malware",
+                    reason="Hash Match",
                     recommend="delete",
                     comment=self.hash_db[h],
                     engine="static",
