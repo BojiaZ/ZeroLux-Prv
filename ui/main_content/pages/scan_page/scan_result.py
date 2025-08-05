@@ -83,7 +83,7 @@ class ScanResultPage(QWidget):
     def _init_threat_view(self):
         page = QWidget()
         vbox = QVBoxLayout(page)
-        vbox.setContentsMargins(32, 32, 32, 24)
+        vbox.setContentsMargins(0, 0, 0, 0)
         vbox.setSpacing(18)
 
         # 标题 & 描述
