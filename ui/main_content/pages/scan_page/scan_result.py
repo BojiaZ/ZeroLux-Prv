@@ -229,9 +229,13 @@ class ScanResultPage(QWidget):
     # ------------------------------------------------------------------
     #                              Slots
     # ------------------------------------------------------------------
-    @Slot(object)
-    def _on_action_progress(self, p):
-        self.progress.setValue(int(p))
+    @Slot(float, str)
+    def _on_action_progress(self, percent, path):
+        self.progress.setValue(int(percent))
+        if path:
+            self.lab_path.setText(f"正在处理：{path}")
+        else:
+            self.lab_path.clear()          # 开头 0% / 结尾 100% 时可清空
 
     @Slot(object)
     def _on_action_result(self, r: ActionResult):

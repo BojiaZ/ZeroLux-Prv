@@ -33,7 +33,7 @@ class ScanSelectPage(QWidget):
         header.addWidget(title)
         header.addWidget(desc)
         layout.addLayout(header)
-        layout.addSpacing(32)
+        layout.addSpacing(12)
 
         # ------- 顶部Tab -------
         self.tabs = ["即时扫描", "扫描历史"]

@@ -17,7 +17,7 @@ class ExecuteRoute(QObject):
     """
 
     # 信号：进度百分比，单项ActionResult，批量全部ActionResult
-    signal_execute_progress = Signal(float)
+    signal_execute_progress = Signal(float, str)
     signal_execute_result = Signal(object)     # ActionResult
     signal_execute_finished = Signal(list)     # list[ActionResult]
 
@@ -34,7 +34,11 @@ class ExecuteRoute(QObject):
         results = []  # 存所有ActionResult
         total = len(scan_results)
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 记录操作时间
+        # ① 启动时可先发 0%
+        self.signal_execute_progress.emit(0.0, "")
         for idx, s in enumerate(scan_results):
+
+            current_path = s.file_path
             # 取文件名，方便UI展示
             file_name = os.path.basename(s.file_path)
 
@@ -70,6 +74,8 @@ class ExecuteRoute(QObject):
             results.append(action)                   # 收集到总列表里
 
             percent = (idx + 1) / total * 100 if total else 100  # 进度百分比
-            self.signal_execute_progress.emit(percent)           # 实时发送进度
-
+            self.signal_execute_progress.emit(percent, current_path)           # 实时发送进度
+        
+        # ③ 结束保证 100%
+        self.signal_execute_progress.emit(100.0, "")
         self.signal_execute_finished.emit(results)   # 全部处理完后批量发回全部结果列表
