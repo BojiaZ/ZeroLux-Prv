@@ -1,6 +1,7 @@
 import os
+import sqlite3
 from structs.scanresult import ScanResult
-from .calc_hash import calc_md5, calc_sha1, calc_sha256
+from .calc_hash import calc_md5
 
 class StaticEngine:
     """
@@ -21,34 +22,14 @@ class StaticEngine:
         接受文件路径，返回检测结果对象 ScanResult
     """
     def __init__(self):
-        self.hash_db = None
-        self.HASH_DB_PATH = os.path.join(os.path.dirname(__file__), 'hash-iocs.txt')
-        self._load_hash_db()
+        # 1. 定位到项目根目录下的 db/mal_hashes.db
+        base_dir = os.path.dirname(__file__)
+        root_dir = os.path.abspath(os.path.join(base_dir, '..'))
+        self.DB_PATH = os.path.join(root_dir, 'db', 'mal_hashes.db')
 
-    def _load_hash_db(self):
-        """
-        加载哈希库文件到内存。
-
-        无参数，直接读取固定路径文件。
-
-        异常处理：
-        - 文件不存在时打印警告，不抛异常。
-        """
-        hash_db = {}
-        try:
-            with open(self.HASH_DB_PATH, 'r', encoding='utf-8') as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or line.startswith('#'):
-                        continue
-                    parts = line.split(';', 1)
-                    if len(parts) != 2:
-                        continue
-                    hash_val, comment = parts
-                    hash_db[hash_val.lower()] = comment
-        except FileNotFoundError:
-            print(f"[WARN] Hash DB file not found: {self.HASH_DB_PATH}")
-        self.hash_db = hash_db
+        # 2. 打开 SQLite 连接
+        self.conn = sqlite3.connect(self.DB_PATH)
+        self.cur = self.conn.cursor()
 
     def check_file_by_hash(self, filepath) -> ScanResult:
         """
@@ -60,25 +41,30 @@ class StaticEngine:
         返回：
         - ScanResult 对象，包含文件路径、检测状态、威胁类型、建议操作、注释等信息。
         """
-        md5 = calc_md5(filepath)
-        sha1 = calc_sha1(filepath)
-        sha256 = calc_sha256(filepath)
+        # 只用 MD5
+        md5 = calc_md5(filepath).lower()
 
-        for h in (md5, sha1, sha256):
-            if h in self.hash_db:
-                return ScanResult(
-                    file_path=filepath,
-                    detected=True,
-                    threat_type="Known Malware",
-                    reason="Hash Match",
-                    recommend="delete",
-                    comment=self.hash_db[h],
-                    engine="static",
-                    hash_value=h
-                )
+        # 直接 SQL 查询
+        self.cur.execute("SELECT md5 FROM hashes WHERE md5 = ?", (md5,))
+        if self.cur.fetchone():
+            return ScanResult(
+                file_path=filepath,
+                detected=True,
+                threat_type="Known Malware",
+                reason="MD5 Hash Match",
+                recommend="quarantine",
+                comment="VirusShare MD5 (DB)",
+                engine="static",
+                hash_value=md5
+            )
+        
         return ScanResult(
             file_path=filepath,
             detected=False,
             engine="static",
             hash_value=md5
         )
+    
+    def close(self):
+        """关闭数据库连接，程序退出前调用。"""
+        self.conn.close()

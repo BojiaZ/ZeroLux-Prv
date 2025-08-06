@@ -60,7 +60,7 @@ class Traverser(QThread):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.static_engine = StaticEngine()
+        
         self.root_path = None
         self._paused = False
         self._stopped = False
@@ -91,6 +91,7 @@ class Traverser(QThread):
         外部调用 self.start() 启动线程
         """
         print("[Traverser] start scanning...")
+        self.static_engine = StaticEngine()
         if not self.paths:
             print("[Traverser] paths empty, finish immediately")
             self.signal_scan_finished.emit()
@@ -139,6 +140,8 @@ class Traverser(QThread):
         # 发送扫描完成信号
         self.signal_scan_finished.emit()
         self.signal_scan_all_results.emit(self._all_results)   # 批量发给UI
+
+        self.static_engine.close()
 
     def _traverse_files(self, paths: list[str]) -> list[str]:
         """
