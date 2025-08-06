@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtGui import QIcon, QPixmap, QShortcut
 from PySide6.QtCore import Qt, QSize
-
+from ui.dialogs.log_dialog import LogDialog
 from ui.topbar import TopBar
 from ui.leftbar.leftbar import LeftBar
 from ui.main_content.main_content import MainContent
@@ -13,6 +13,7 @@ from ui.main_content.main_content import MainContent
 from execute.execute_router import ExecuteRoute
 from quarantine.quarantine_route import QuarantineRoute
 from scans.scans_router import ScanRoute
+from managers.log_manager import LogManager
 
 class HomeCard(QWidget): pass
 class LogCard(QWidget): pass
@@ -34,10 +35,11 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # 业务对象初始化
-        self.execute_route = ExecuteRoute()
-        self.quarantine_route = QuarantineRoute(self.execute_route)
-        self.scan_route = ScanRoute()
+        # 业务对象初始化 —— 正确顺序
+        self.quarantine_route = QuarantineRoute()          # 无需参数
+        self.execute_route    = ExecuteRoute(self.quarantine_route)
+        self.scan_route       = ScanRoute()
+        self.log_mgr          = LogManager()
 
         # 顶部栏
         self.top_bar = TopBar()
@@ -56,7 +58,7 @@ class MainWindow(QMainWindow):
         area_layout.addWidget(self.left_bar)
 
         # 右内容区（直接用MainContent）
-        self.main_content = MainContent(scan_route=self.scan_route, execute_route=self.execute_route)
+        self.main_content = MainContent(scan_route=self.scan_route, execute_route=self.execute_route, log_mgr=self.log_mgr, quarantine_route=self.quarantine_route)
         area_layout.addWidget(self.main_content)
         main_layout.addWidget(main_area)
 
@@ -71,3 +73,4 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     app.exec()
+    

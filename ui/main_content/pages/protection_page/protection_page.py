@@ -1,77 +1,43 @@
 # ui/pages/protection_page/protection_page.py
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
-from PySide6.QtGui      import QPixmap, QPainter, QPen, QColor
-from PySide6.QtCore     import Qt, QSize
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+)
+from PySide6.QtCore import Qt
 
-# ---- 视觉常量 ----
-PRIMARY      = "#009CA6"
-CARD_BG      = "#FFFFFF"
-CARD_BORDER  = "#e1e1e1"
-CARD_RADIUS  = 16
+from ui.dialogs.quarantine_dialog import QuarantineDialog
+from quarantine.quarantine_route  import QuarantineRoute
 
-def _generate_lock_icon(size: int = 48) -> QPixmap:
-    """动态绘制简易锁图标，返回 QPixmap（透明背景）"""
-    pix = QPixmap(QSize(size, size))
-    pix.fill(Qt.transparent)
-
-    painter = QPainter(pix)
-    painter.setRenderHint(QPainter.Antialiasing)
-    pen = QPen(QColor(PRIMARY))
-    pen.setWidth(3)
-    painter.setPen(pen)
-
-    # 锁体矩形
-    body = pix.rect().adjusted(size*0.2, size*0.45, -size*0.2, -size*0.1)
-    painter.drawRoundedRect(body, 6, 6)
-
-    # 锁梁圆弧
-    arc = pix.rect().adjusted(size*0.25, size*0.05, -size*0.25, size*0.45)
-    painter.drawArc(arc, 30*16, 120*16)   # 起止角 *16（Qt 单位）
-
-    painter.end()
-    return pix
 
 class ProtectionPage(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, quarantine_route: QuarantineRoute, parent=None):
         super().__init__(parent)
+        self.quarantine_route = quarantine_route                # 保存路由器引用
 
-        # ---- 整体居中 ----
+        # ====== 根布局（如果你已有 root，就用现成的） ======
         root = QVBoxLayout(self)
-        root.setAlignment(Qt.AlignCenter)
+        root.setContentsMargins(32, 32, 32, 24)
+        root.setSpacing(18)
 
-        # ---- 占位卡片 ----
-        card = QWidget()
-        card.setFixedSize(320, 180)
-        card.setAttribute(Qt.WA_StyledBackground, True)
-        card.setStyleSheet(f"""
-            background:{CARD_BG};
-            border:1px solid {CARD_BORDER};
-            border-radius:{CARD_RADIUS}px;
-        """)
+        # 👉 这里放你原本的“实时防护状态”组件 / 开关 / 描述 ... ...
 
-        c_layout = QVBoxLayout(card)
-        c_layout.setContentsMargins(24, 24, 24, 24)
-        c_layout.setSpacing(12)
-        c_layout.setAlignment(Qt.AlignCenter)
+        root.addStretch()                     # 把“隔离区”按钮顶到最下方
 
-        # 图标
-        icon_lbl = QLabel()
-        icon_lbl.setPixmap(_generate_lock_icon())
-        icon_lbl.setAlignment(Qt.AlignCenter)
-        c_layout.addWidget(icon_lbl)
+        # ====== 按钮栏 ======
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()                  # 靠右
+        btn_quar = QPushButton("隔离区")
+        btn_quar.setFixedSize(100, 32)
+        btn_quar.setStyleSheet(
+            "QPushButton{background:#eafafd;color:#15bcc6;border:2px solid #15bcc6;"
+            "border-radius:6px;font-weight:bold;}"
+            "QPushButton:hover{background:#b8f1fc;}"
+        )
+        btn_quar.clicked.connect(self._open_quarantine)
 
-        # 标题
-        title_lbl = QLabel("实时防护")
-        title_lbl.setAlignment(Qt.AlignCenter)
-        title_lbl.setStyleSheet("font-size:18px; font-weight:600; color:#333;")
-        c_layout.addWidget(title_lbl)
+        btn_row.addWidget(btn_quar)
+        root.addLayout(btn_row)
 
-        # 副标题
-        sub_lbl = QLabel("该功能正在开发中")
-        sub_lbl.setAlignment(Qt.AlignCenter)
-        sub_lbl.setWordWrap(True)
-        sub_lbl.setStyleSheet("font-size:12px; color:#777;")
-        c_layout.addWidget(sub_lbl)
-
-        # 把卡片放到页面中心
-        root.addWidget(card)
+    # ---------- 槽：弹出隔离区对话框 ----------
+    def _open_quarantine(self):
+        dlg = QuarantineDialog(self.quarantine_route, self)
+        dlg.open_and_refresh()      # 先刷新再 exec()

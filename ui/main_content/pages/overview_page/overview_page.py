@@ -2,12 +2,17 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QFrame, QSizePolicy
 from PySide6.QtSvgWidgets import QSvgWidget
 from .function_card import FunctionCard   # <—— 关键
+from managers.log_manager import LogManager
+from ui.dialogs.log_dialog import LogDialog
 
 class OverviewPage(QWidget):
     actionRequested = Signal(str)  # "scan" / "update" / "report"
 
-    def __init__(self, parent=None):
+    def __init__(self, log_mgr: LogManager, parent=None):
         super().__init__(parent)
+
+        self.log_mgr = log_mgr 
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 32, 20, 32)
         layout.setSpacing(28)
@@ -36,7 +41,9 @@ class OverviewPage(QWidget):
 
         card_scan.clicked.connect(self.actionRequested)
         card_update.clicked.connect(self.actionRequested)
+        # --- 把 report 同时连到信号 & 本地槽 ---
         card_report.clicked.connect(self.actionRequested)
+        card_report.clicked.connect(self._show_log_dialog)
 
         btn_layout.addWidget(card_scan)
         btn_layout.addWidget(card_update)
@@ -44,3 +51,7 @@ class OverviewPage(QWidget):
 
         layout.addLayout(btn_layout)
         layout.addStretch()
+
+    def _show_log_dialog(self):
+        dlg = LogDialog(self.log_mgr, self)
+        dlg.exec()            # 弹窗内会先 refresh()
