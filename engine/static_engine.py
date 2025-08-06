@@ -71,7 +71,7 @@ class StaticEngine:
                     detected=True,
                     threat_type="Known Malware",
                     reason="Hash Match",
-                    recommend="quarantine",
+                    recommend="delete",
                     comment=self.hash_db[h],
                     engine="static",
                     hash_value=h
