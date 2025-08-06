@@ -209,3 +209,4 @@ __marimo__/
 # --- 扫描历史文件 ---
 db/history.json
 db/quarantine.json
+db/history.json
