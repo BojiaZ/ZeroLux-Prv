@@ -17,6 +17,7 @@
 
 # 563d1512178cec1f6a73c98d565c98fa;Cygwin nc.exe example
 
+44d88612fea8a8f36de82e1278abb02f;EICAR-Test-File
 ce583821191345274cd954b2db7da9742c239fe413fc17dcb97ffdd7b51cb072;Dark Caracal - MS Windows HtmlHelp Data
 ba4e063472a2559b4baa82d5272304a1cdae6968145c5ef221295c90e88458e2;Dark Caracal - PE32 executable (DLL) (GUI) Intel 80386
 26419a0b6e033cdcb7bf4ca6b0b24fda35490cc6f2796682fb9403620f63d428;Dark Caracal - PE32 executable (GUI) Intel 80386
