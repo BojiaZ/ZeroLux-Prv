@@ -79,14 +79,18 @@ class QuarantineEngine:
         except Exception as e:
             return False, str(e)
 
-    # ===== 删除 =====
-    def delete(self, iso_path: str) -> tuple[bool, str]:
-        """
-        彻底删除隔离文件
-        Returns: ok, err_msg
-        """
+    # -------- 删除隔离文件 --------
+    def delete(self, qtn_path: str):
+        print("Delete requested:", qtn_path)
         try:
-            pathlib.Path(iso_path).unlink(missing_ok=True)
+            p = pathlib.Path(qtn_path)
+            if p.exists():
+                # 先解锁 ACL，保证能删 (Windows)
+                try:
+                    os.system(f'icacls "{p}" /grant *S-1-1-0:F /T /C >nul 2>&1')
+                except Exception:
+                    pass
+                p.unlink()           # 真正删除
             return True, ""
         except Exception as e:
             return False, str(e)
