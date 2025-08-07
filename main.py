@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import (
-    QMenu, QWidget, QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QStackedWidget
+    QMenu, QWidget, QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QSystemTrayIcon
 )
 from PySide6.QtSvgWidgets import QSvgWidget
-from PySide6.QtGui import QIcon, QPixmap, QShortcut
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QIcon, QPixmap, QShortcut, QAction
+from PySide6.QtCore import Qt, QSize, QEvent
 from ui.dialogs.log_dialog import LogDialog
 from ui.topbar import TopBar
 from ui.leftbar.leftbar import LeftBar
@@ -66,6 +66,60 @@ class MainWindow(QMainWindow):
         self.left_bar.page_selected.connect(self.main_content.goto)
         # 页面切换完成 → 左栏高亮
         self.main_content.page_changed.connect(self.left_bar.set_highlight)
+
+        #初始化托盘
+        self.init_tray_icon()
+
+        
+    def init_tray_icon(self):
+        # SVG 直接转 QIcon
+        icon = QIcon("resources/icons/Zerolux_logo.svg")
+        self.tray_icon = QSystemTrayIcon(icon, self)
+        self.tray_icon.setToolTip("Zerolux Antivirus")
+
+        # 托盘菜单
+        tray_menu = QMenu()
+        action_show = QAction("打开主界面", self)
+        action_quit = QAction("退出", self)
+        tray_menu.addAction(action_show)
+        tray_menu.addAction(action_quit)
+        self.tray_icon.setContextMenu(tray_menu)
+
+        # 信号绑定
+        action_show.triggered.connect(self.show_window)
+        action_quit.triggered.connect(QApplication.instance().quit)
+        self.tray_icon.activated.connect(self.on_tray_activated)
+
+        self.tray_icon.show()
+
+
+    def show_window(self):
+        self.showNormal()
+        self.raise_()
+        self.activateWindow()
+
+    def on_tray_activated(self, reason):
+        if reason == QSystemTrayIcon.Trigger:
+            # 单击托盘图标时
+            self.show_window()
+    
+    def closeEvent(self, event):
+        # 拦截关闭事件 → 隐藏窗口到托盘而不真正退出
+        event.ignore()
+        self.hide()
+        self.tray_icon.showMessage(
+            "Zerolux Antivirus",
+            "程序已最小化到托盘，可右键托盘图标操作。",
+            QSystemTrayIcon.Information,
+            2000
+        )
+
+    def changeEvent(self, event):
+        # 拦截最小化
+        if event.type() == QEvent.WindowStateChange:
+            if self.isMinimized():
+                self.hide()
+        super().changeEvent(event)
 
     
 if __name__ == "__main__":
