@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
         #初始化托盘
         self.init_tray_icon()
 
-        
+
     def init_tray_icon(self):
         # SVG 直接转 QIcon
         icon = QIcon("resources/icons/Zerolux_logo.svg")

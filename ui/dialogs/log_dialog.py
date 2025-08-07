@@ -3,6 +3,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from managers.log_manager import LogManager
+import json
+from structs.log_entry import LogEntry
 
 
 class LogDialog(QDialog):
@@ -14,9 +16,9 @@ class LogDialog(QDialog):
         self.resize(860, 520)
         self.log_mgr = log_mgr
         self._build_ui()
-
+        self.refresh()  # 初次加载
         # 若想实时刷新，可打开下面这行
-        # self.log_mgr.signal_new_log.connect(self.refresh)
+        self.log_mgr.signal_new_log.connect(self.refresh)
 
     # ---------- UI ----------
     def _build_ui(self):
@@ -54,8 +56,15 @@ class LogDialog(QDialog):
 
     # ---------- 数据 ----------
     def refresh(self):
+        # 每次刷新都从文件读取最新日志
+        path = self.log_mgr.path
+        if path.exists():
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            entries = [LogEntry(**d) for d in raw]
+        else:
+            entries = []
         self.tbl.setRowCount(0)
-        for e in self.log_mgr.entries:
+        for e in entries:
             r = self.tbl.rowCount(); self.tbl.insertRow(r)
             self.tbl.setItem(r, 0, QTableWidgetItem(e.timestamp))
             self.tbl.setItem(r, 1, QTableWidgetItem(e.path or "—"))
